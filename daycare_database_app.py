@@ -152,9 +152,17 @@ class DaycareDatabaseApp:
 
         tk.Label(payment_window, text='Name:').grid(row=0, column=0)
 
-        # Get the list of children's names, sort it, and create a Combobox with it
-        children_names = sorted([child['name'] for child in self.db_manager.read_database()])
-        name_combobox = ttk.Combobox(payment_window, values=children_names)
+        # Read the children's data from the database
+        children_data = self.db_manager.read_database()
+
+        # Filter out the children with a balance of 0
+        children_with_balance = [child for child in children_data if float(child['balance']) > 0]
+
+        # Create a list of strings, where each string contains a child's name and their balance
+        names_and_balances = [f"{child['name'].ljust(20)} {format(float(child['balance']), '.2f').strip().rjust(10)}" for child in children_with_balance]
+
+        # Create a Combobox with the list of strings
+        name_combobox = ttk.Combobox(payment_window, values=names_and_balances, font=('Courier', 10))
         name_combobox.grid(row=0, column=1)
 
         tk.Label(payment_window, text='Amount:').grid(row=1, column=0)
@@ -162,7 +170,7 @@ class DaycareDatabaseApp:
         amount_entry.grid(row=1, column=1)
 
         tk.Button(payment_window, text='Apply',
-                  command=lambda: self.apply_payment(name_combobox.get(), amount_entry.get(), payment_window)).grid(row=2, column=0)
+                  command=lambda: self.apply_payment(name_combobox.get().strip().split()[0], amount_entry.get(), payment_window)).grid(row=2, column=0)
 
         tk.Button(payment_window, text='Exit', command=payment_window.destroy).grid(row=2, column=1)
 
