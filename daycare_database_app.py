@@ -129,16 +129,17 @@ class DaycareDatabaseApp:
         list_window.title("View List")
 
         tree = ttk.Treeview(list_window, columns=("Name", "Age", "Balance"), show="headings")
-        tree.heading('Name', text='Name')
-        tree.heading('Age', text='Age')
-        tree.heading('Balance', text='Balance')
+        tree.heading('Name', text='Name', anchor='e')
+        tree.heading('Age', text='Age', anchor='e')
+        tree.heading('Balance', text='Balance', anchor='e')
 
         tree.column('Name', anchor='e')
         tree.column('Age', anchor='e')
         tree.column('Balance', anchor='e')
 
         for child in sorted(self.db_manager.read_database(), key=lambda x: x['name']):
-            tree.insert('', tk.END, values=(child['name'], child['age'], child['balance']))
+            formatted_balance = "{:.2f}".format(float(child['balance']))
+            tree.insert('', tk.END, values=(child['name'], child['age'], formatted_balance))
 
         tree.pack(expand=True, fill='both')
         tk.Button(list_window, text='Exit', command=list_window.destroy).pack(fill='x')

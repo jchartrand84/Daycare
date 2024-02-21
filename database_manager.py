@@ -39,7 +39,9 @@ class DatabaseManager:
             fieldnames = ['name', 'age', 'balance']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(data)
+            for row in data:
+                row['balance'] = "{:.2f}".format(float(row['balance']))
+                writer.writerow(row)
 
     def read_attendance(self):
         """
