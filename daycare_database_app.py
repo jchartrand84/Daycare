@@ -74,12 +74,21 @@ class DaycareDatabaseApp:
                                                  add_window)).grid(row=3, column=0)
         tk.Button(add_window, text='Cancel', command=add_window.destroy).grid(row=3, column=1)
 
+        # Sort the children's names after adding a new child
+        data = self.db_manager.read_database()
+        data.sort(key=lambda x: x['name'])
+        self.db_manager.write_database(data)
+
     def add_child(self, name, age, balance, window):
         """
         Add a child to the database.
         """
         data = self.db_manager.read_database()
         data.append({'name': name, 'age': age, 'balance': balance})
+
+        # Sort the data by children's names
+        data.sort(key=lambda x: x['name'])
+
         self.db_manager.write_database(data)
         messagebox.showinfo("Success", "Child added successfully", parent=window)
         window.destroy()
@@ -92,10 +101,13 @@ class DaycareDatabaseApp:
         remove_window.title("Remove Child")
 
         tk.Label(remove_window, text='Name:').grid(row=0, column=0)
-        name_entry = tk.Entry(remove_window)
-        name_entry.grid(row=0, column=1)
 
-        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(name_entry.get(), remove_window)).grid(
+        # Get the list of children's names, sort it, and create a Combobox with it
+        children_names = sorted([child['name'] for child in self.db_manager.read_database()])
+        name_combobox = ttk.Combobox(remove_window, values=children_names)
+        name_combobox.grid(row=0, column=1)
+
+        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(name_combobox.get(), remove_window)).grid(
             row=1, column=0)
         tk.Button(remove_window, text='Cancel', command=remove_window.destroy).grid(row=1, column=1)
 
@@ -139,18 +151,18 @@ class DaycareDatabaseApp:
         payment_window.title("Record Payment")
 
         tk.Label(payment_window, text='Name:').grid(row=0, column=0)
-        name_entry = tk.Entry(payment_window)
-        name_entry.grid(row=0, column=1)
+
+        # Get the list of children's names, sort it, and create a Combobox with it
+        children_names = sorted([child['name'] for child in self.db_manager.read_database()])
+        name_combobox = ttk.Combobox(payment_window, values=children_names)
+        name_combobox.grid(row=0, column=1)
 
         tk.Label(payment_window, text='Amount:').grid(row=1, column=0)
         amount_entry = tk.Entry(payment_window)
         amount_entry.grid(row=1, column=1)
 
         tk.Button(payment_window, text='Apply',
-                  command=lambda: self.apply_payment(name_entry.get(),
-                                                     amount_entry.get(),
-                                                     payment_window)
-                  ).grid(row=2, column=0)
+                  command=lambda: self.apply_payment(name_combobox.get(), amount_entry.get(), payment_window)).grid(row=2, column=0)
 
         tk.Button(payment_window, text='Exit', command=payment_window.destroy).grid(row=2, column=1)
 
