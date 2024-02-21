@@ -191,12 +191,12 @@ class DaycareDatabaseApp:
                         overpayment = amount - float(child['balance'])
                         child['balance'] = '0'
                         messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
-                                                           f"An amount of {overpayment} "
+                                                           f"An amount of {overpayment:.2f} "
                                                            f"will be returned to the customer.", parent=window)
                     else:
                         child['balance'] = str(float(child['balance']) - amount)
                     self.db_manager.write_database(data)
-                    messagebox.showinfo("Success", f"Payment of {amount} applied to {name}", parent=window)
+                    messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
                     window.destroy()
                     return
             messagebox.showerror("Error", f"No child with name {name} found", parent=window)
