@@ -107,8 +107,8 @@ class DaycareDatabaseApp:
         name_combobox = ttk.Combobox(remove_window, values=children_names)
         name_combobox.grid(row=0, column=1)
 
-        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(name_combobox.get(), remove_window)).grid(
-            row=1, column=0)
+        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(name_combobox.get(),
+                                                                                 remove_window)).grid(row=1, column=0)
         tk.Button(remove_window, text='Cancel', command=remove_window.destroy).grid(row=1, column=1)
 
     def remove_child(self, name, window):
@@ -159,7 +159,8 @@ class DaycareDatabaseApp:
         children_with_balance = [child for child in children_data if float(child['balance']) > 0]
 
         # Create a list of strings, where each string contains a child's name and their balance
-        names_and_balances = [f"{child['name'].ljust(20)} {format(float(child['balance']), '.2f').strip().rjust(10)}" for child in children_with_balance]
+        names_and_balances = [f"{child['name'].ljust(20)} {format(float(child['balance']), '.2f').strip().rjust(10)}"
+                              for child in children_with_balance]
 
         # Create a Combobox with the list of strings
         name_combobox = ttk.Combobox(payment_window, values=names_and_balances, font=('Courier', 10))
@@ -170,7 +171,8 @@ class DaycareDatabaseApp:
         amount_entry.grid(row=1, column=1)
 
         tk.Button(payment_window, text='Apply',
-                  command=lambda: self.apply_payment(name_combobox.get().strip().split()[0], amount_entry.get(), payment_window)).grid(row=2, column=0)
+                  command=lambda: self.apply_payment(name_combobox.get().strip().split()[0], amount_entry.get(),
+                                                     payment_window)).grid(row=2, column=0)
 
         tk.Button(payment_window, text='Exit', command=payment_window.destroy).grid(row=2, column=1)
 
