@@ -24,23 +24,46 @@ class AttendanceWindow(tk.Toplevel):
         self.date = date
         self.title(f"Attendance for {date}")
 
-        attendance = self.get_attendance(str(date))
-        if attendance:
-            for child in attendance:
-                tk.Label(self, text=child).pack()
-        else:
-            tk.Label(self, text='-').pack()
-
         all_children = self.get_all_children()
-        child_name = tk.StringVar(self)
-        child_name.set(all_children[0])
-        child_menu = tk.OptionMenu(self, child_name, *all_children)
-        child_menu.pack()
+        self.child_name = tk.StringVar(self)
+        self.child_name.set(all_children[0])
+        self.child_menu = tk.OptionMenu(self, self.child_name, *all_children)
+        self.child_menu.config(width=20)
+        self.child_menu.grid(row=0, column=2, sticky='w')
 
-        tk.Button(self, text='Add', command=lambda: self.add_child_to_attendance(child_name.get())).pack(fill='x')
-        tk.Button(self, text='Remove', command=lambda: self.remove_child_from_attendance(child_name.get())).pack(
-            fill='x')
-        tk.Button(self, text='Exit', command=self.destroy).pack(fill='x')
+        self.add_button = tk.Button(self, text='Add', command=lambda: self.add_child_to_attendance(self.child_name.get()
+                                                                                                   ), width=20)
+        self.add_button.grid(row=1, column=2)
+
+        self.remove_button = tk.Button(self, text='Remove', command=lambda: self.remove_child_from_attendance(
+            self.child_name.get()), width=20)
+        self.remove_button.grid(row=2, column=2)
+
+        self.exit_button = tk.Button(self, text='Exit', command=self.destroy, width=20)
+        self.exit_button.grid(row=3, column=2)
+
+        # Add a vertical line between the two columns
+        tk.Frame(self, width=2, bg="black").grid(row=0, column=1, rowspan=4, sticky='ns')
+
+        self.grid_columnconfigure(0, weight=1, minsize=100)  # Set a minimum width for the first column
+        self.update_labels()
+
+    def update_labels(self):
+        """
+        Update the labels for the window.
+        """
+        # Remove all current labels
+        for widget in self.grid_slaves():
+            if isinstance(widget, tk.Label):
+                widget.destroy()
+
+        # Add new labels
+        attendance = self.get_attendance(str(self.date))
+        if attendance:
+            for i, child in enumerate(sorted(attendance)):
+                tk.Label(self, text=child).grid(row=i, column=0, sticky='e', padx=10)
+        else:
+            tk.Label(self, text='-').grid(row=0, column=0, sticky='e', padx=10)
 
     def get_attendance(self, date):
         """
@@ -61,7 +84,7 @@ class AttendanceWindow(tk.Toplevel):
         """
         Add a child to the attendance for the current date.
         """
-        if self.check_month_finalized():
+        if self.check_month_finalized() or self.check_weekend():
             return
 
         attendance_data = self.db_manager.read_attendance()
@@ -73,14 +96,14 @@ class AttendanceWindow(tk.Toplevel):
         attendance_data.append({'date': str(self.date), 'name': child_name})
         self.db_manager.write_attendance(attendance_data)
 
-        self.destroy()
-        AttendanceWindow(self.master, self.db_manager, self.date)
+        # Update the labels
+        self.update_labels()
 
     def remove_child_from_attendance(self, child_name):
         """
         Remove a child from the attendance for the current date.
         """
-        if self.check_month_finalized():
+        if self.check_month_finalized() or self.check_weekend():
             return
 
         attendance_data = self.db_manager.read_attendance()
@@ -96,8 +119,9 @@ class AttendanceWindow(tk.Toplevel):
             if record['name'] != child_name or record['date'] != str(self.date)
         ]
         self.db_manager.write_attendance(attendance_data)
-        self.destroy()
-        AttendanceWindow(self.master, self.db_manager, self.date)
+
+        # Update the labels
+        self.update_labels()
 
     def check_month_finalized(self):
         """
@@ -108,5 +132,14 @@ class AttendanceWindow(tk.Toplevel):
         filename = os.path.join(os.path.dirname(__file__), f'{month}_{year}_EndMonth.csv')
         if os.path.exists(filename):
             messagebox.showinfo("Error", "The month has been finalized. You cannot modify the attendance.", parent=self)
+            return True
+        return False
+
+    def check_weekend(self):
+        """
+        Check if the current date is a weekend.
+        """
+        if self.date.weekday() >= 5:  # 5 and 6 corresponds to Saturday and Sunday
+            messagebox.showinfo("Error", "You cannot modify the attendance for weekends.", parent=self)
             return True
         return False

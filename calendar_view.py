@@ -22,11 +22,19 @@ class CalendarView(tk.Toplevel):
         """
         Initialize the CalendarView with a parent Tkinter window and a DatabaseManager.
         """
-        super().__init__(parent)
-        self.cal = None
+        tk.Toplevel.__init__(self, parent)
+        self.parent = parent
         self.db_manager = db_manager
-        self.title("Calendar View")
+        self.title('Calendar View')
         self.setup_calendar()
+
+        # Lock the window size
+        window_width = 300  # adjust to your desired width
+        window_height = 265  # adjust to your desired height
+        self.minsize(window_width, window_height)
+        self.maxsize(window_width, window_height)
+
+    # rest of your code
 
     def setup_calendar(self):
         """
@@ -35,14 +43,14 @@ class CalendarView(tk.Toplevel):
         """
         current_date = datetime.datetime.now()
         self.cal = Calendar(self, selectmode='day', year=current_date.year, month=current_date.month,
-                            day=current_date.day, showweeknumbers=False)
+                            day=current_date.day, showweeknumbers=False, selectbackground='green', selectforeground='black')
         self.cal.pack(padx=10, pady=10)
         self.cal.selection_set(current_date)
 
         tk.Button(self, text='Edit Date', command=lambda: self.open_attendance_window(self.cal.selection_get())).pack(
             fill='x')
+        tk.Button(self, text='End Month', command=self.end_month).pack(fill='x')
         tk.Button(self, text='Exit', command=self.destroy).pack(fill='x')
-        tk.Button(self, text='End Month', command=self.end_month).pack(fill='x')  # Removed lambda function
 
     def open_attendance_window(self, date):
         """

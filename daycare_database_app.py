@@ -15,7 +15,7 @@ applying payments, and viewing the calendar. It uses the DatabaseManager class t
 
 class DaycareDatabaseApp:
     """
-        #The DaycareDatabaseApp class manages the main application window and user interactions.
+    The DaycareDatabaseApp class manages the main application window and user interactions.
     """
     def __init__(self, root_window):
         """
@@ -30,19 +30,28 @@ class DaycareDatabaseApp:
         button_frame = tk.Frame(self.root, bg='lightgrey')
         button_frame.pack(fill='x', padx=10, pady=10)
 
-        tk.Button(button_frame, text='Calendar View', command=self.open_calendar_window, font=custom_font,
-                  bg='lightblue').pack(fill='x', padx=5, pady=5)
-        tk.Button(button_frame, text='Add Child', command=self.open_add_child_window, font=custom_font,
-                  bg='lightblue').pack(fill='x', padx=5, pady=5)
+        button_width = 20
+        button_height = 2
+
+        tk.Button(button_frame, text='Calendar', command=self.open_calendar_window, font=custom_font,
+                  bg='lightblue', width=button_width, height=button_height).grid(row=0, column=0, padx=5, pady=5)
+        ttk.Separator(button_frame, orient='vertical').grid(row=0, column=1, rowspan=3, sticky='ns')
+        tk.Button(button_frame, text='Add New Child', command=self.open_add_child_window, font=custom_font,
+                  bg='lightblue', width=button_width, height=button_height).grid(row=0, column=2, padx=5, pady=5)
+        ttk.Separator(button_frame, orient='vertical').grid(row=0, column=3, rowspan=3, sticky='ns')
+        tk.Button(button_frame, text='View Database', command=self.view_list, font=custom_font, bg='lightblue', width=button_width, height=button_height).grid(
+            row=0, column=4, padx=5, pady=5)
         tk.Button(button_frame, text='Remove Child', command=self.open_remove_child_window, font=custom_font,
-                  bg='lightblue').pack(fill='x', padx=5, pady=5)
-        tk.Button(button_frame, text='View Database', command=self.view_list, font=custom_font, bg='lightblue').pack(
-            fill='x', padx=5, pady=5)
-        tk.Button(button_frame, text='Apply Payment', command=self.open_payment_window, font=custom_font,
-                  bg='lightblue').pack(fill='x', padx=5, pady=5)
-        tk.Button(button_frame, text='Exit', command=self.root.quit, font=custom_font, bg='lightblue').pack(fill='x',
-                                                                                                            padx=5,
-                                                                                                            pady=5)
+                  bg='lightblue', width=button_width, height=button_height).grid(row=1, column=2, padx=5, pady=5)
+        tk.Button(button_frame, text='Process Payment', command=self.open_payment_window, font=custom_font,
+                  bg='lightblue', width=button_width, height=button_height).grid(row=1, column=4, padx=5, pady=5)
+        tk.Button(button_frame, text='Exit', command=self.root.quit, font=custom_font, bg='lightblue', width=button_width, height=button_height).grid(row=2, column=0, padx=5, pady=5)
+
+        # Lock the window size
+        window_width = 625
+        window_height = 200
+        self.root.minsize(window_width, window_height)
+        self.root.maxsize(window_width, window_height)
 
     def open_calendar_window(self):
         """
