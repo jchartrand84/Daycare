@@ -39,13 +39,15 @@ class DaycareDatabaseApp:
         tk.Button(button_frame, text='Add New Child', command=self.open_add_child_window, font=custom_font,
                   bg='lightblue', width=button_width, height=button_height).grid(row=0, column=2, padx=5, pady=5)
         ttk.Separator(button_frame, orient='vertical').grid(row=0, column=3, rowspan=3, sticky='ns')
-        tk.Button(button_frame, text='View Database', command=self.view_list, font=custom_font, bg='lightblue', width=button_width, height=button_height).grid(
+        tk.Button(button_frame, text='View Database', command=self.view_list, font=custom_font, bg='lightblue',
+                  width=button_width, height=button_height).grid(
             row=0, column=4, padx=5, pady=5)
         tk.Button(button_frame, text='Remove Child', command=self.open_remove_child_window, font=custom_font,
                   bg='lightblue', width=button_width, height=button_height).grid(row=1, column=2, padx=5, pady=5)
         tk.Button(button_frame, text='Process Payment', command=self.open_payment_window, font=custom_font,
                   bg='lightblue', width=button_width, height=button_height).grid(row=1, column=4, padx=5, pady=5)
-        tk.Button(button_frame, text='Exit', command=self.root.quit, font=custom_font, bg='lightblue', width=button_width, height=button_height).grid(row=2, column=0, padx=5, pady=5)
+        tk.Button(button_frame, text='Exit', command=self.root.quit, font=custom_font, bg='lightblue',
+                  width=button_width, height=button_height).grid(row=2, column=0, padx=5, pady=5)
 
         # Lock the window size
         window_width = 625
@@ -74,26 +76,38 @@ class DaycareDatabaseApp:
         age_entry = tk.Entry(add_window)
         age_entry.grid(row=1, column=1)
 
-        tk.Label(add_window, text='Balance:').grid(row=2, column=0)
-        balance_entry = tk.Entry(add_window)
-        balance_entry.grid(row=2, column=1)
-
         tk.Button(add_window, text='Enter',
-                  command=lambda: self.add_child(name_entry.get(), age_entry.get(), balance_entry.get(),
-                                                 add_window)).grid(row=3, column=0)
-        tk.Button(add_window, text='Cancel', command=add_window.destroy).grid(row=3, column=1)
+                  command=lambda: self.add_child(name_entry.get(), age_entry.get(), add_window)).grid(row=2, column=0)
+        tk.Button(add_window, text='Cancel', command=add_window.destroy).grid(row=2, column=1)
 
         # Sort the children's names after adding a new child
         data = self.db_manager.read_database()
         data.sort(key=lambda x: x['name'])
         self.db_manager.write_database(data)
 
-    def add_child(self, name, age, balance, window):
+    def add_child(self, name, age, window):
         """
         Add a child to the database.
         """
+        if not name:
+            messagebox.showerror("Error", "Name cannot be empty.", parent=window)
+            return
+        if not name.isalpha():
+            messagebox.showerror("Error", "Name should only contain alphabetic characters.", parent=window)
+            return
+        if len(name) > 50:  # Limit the name to 50 characters
+            messagebox.showerror("Error", "Name cannot be more than 50 characters.", parent=window)
+            return
+        try:
+            age = int(age)
+            if age < 0:
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Error", "Age must be a positive integer.", parent=window)
+            return
+
         data = self.db_manager.read_database()
-        data.append({'name': name, 'age': age, 'balance': balance})
+        data.append({'name': name, 'age': age, 'balance': '0'})
 
         # Sort the data by children's names
         data.sort(key=lambda x: x['name'])
@@ -125,6 +139,10 @@ class DaycareDatabaseApp:
         Remove a child from the database.
         """
         data = self.db_manager.read_database()
+        if not any(child['name'] == name for child in data):
+            messagebox.showerror("Error", f"No child with name {name} found", parent=window)
+            return
+
         data = [child for child in data if child['name'] != name]
         self.db_manager.write_database(data)
         messagebox.showinfo("Success", "Child removed successfully", parent=window)
@@ -193,21 +211,25 @@ class DaycareDatabaseApp:
         """
         try:
             amount = float(amount)
-            data = self.db_manager.read_database()
-            for child in data:
-                if child['name'] == name:
-                    if amount > float(child['balance']):
-                        overpayment = amount - float(child['balance'])
-                        child['balance'] = '0'
-                        messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
-                                                           f"An amount of {overpayment:.2f} "
-                                                           f"will be returned to the customer.", parent=window)
-                    else:
-                        child['balance'] = str(float(child['balance']) - amount)
-                    self.db_manager.write_database(data)
-                    messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
-                    window.destroy()
-                    return
-            messagebox.showerror("Error", f"No child with name {name} found", parent=window)
+            if amount < 0:
+                raise ValueError
         except ValueError:
-            messagebox.showerror("Error", "Invalid amount. Please enter a valid number.", parent=window)
+            messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
+            return
+
+        data = self.db_manager.read_database()
+        for child in data:
+            if child['name'] == name:
+                if amount > float(child['balance']):
+                    overpayment = amount - float(child['balance'])
+                    child['balance'] = '0'
+                    messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
+                                                       f"An amount of {overpayment:.2f} "
+                                                       f"will be returned to the customer.", parent=window)
+                else:
+                    child['balance'] = str(float(child['balance']) - amount)
+                self.db_manager.write_database(data)
+                messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
+                window.destroy()
+                return
+        messagebox.showerror("Error", f"No child with name {name} found", parent=window)

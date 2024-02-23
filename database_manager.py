@@ -1,7 +1,5 @@
 import csv
 import os
-import datetime
-from tkinter import messagebox
 
 """
 database_manager.py
@@ -59,23 +57,8 @@ class DatabaseManager:
         """
         Write the updated attendance data.
         """
-        try:
-            # Check if the date is before the current day
-            for row in data:
-                if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() < datetime.date.today():
-                    raise ValueError("Cannot modify past dates.")
-
-            # Count the number of children for the given date
-            date_counts = {}
-            for row in data:
-                date_counts[row['date']] = date_counts.get(row['date'], 0) + 1
-                if date_counts[row['date']] > 6:
-                    raise ValueError("Daily Capacity (6) has been reached.\nChild cannot be added to attendance.")
-
-            with open(self.attendance_filename, mode='w', newline='') as file:
-                fieldnames = ['date', 'name']
-                writer = csv.DictWriter(file, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(data)
-        except ValueError as e:
-            messagebox.showerror("Error", str(e))
+        with open(self.attendance_filename, mode='w', newline='') as file:
+            fieldnames = ['date', 'name']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(data)

@@ -23,6 +23,7 @@ class CalendarView(tk.Toplevel):
         Initialize the CalendarView with a parent Tkinter window and a DatabaseManager.
         """
         tk.Toplevel.__init__(self, parent)
+        self.cal = None
         self.parent = parent
         self.db_manager = db_manager
         self.title('Calendar View')
@@ -43,7 +44,8 @@ class CalendarView(tk.Toplevel):
         """
         current_date = datetime.datetime.now()
         self.cal = Calendar(self, selectmode='day', year=current_date.year, month=current_date.month,
-                            day=current_date.day, showweeknumbers=False, selectbackground='green', selectforeground='black')
+                            day=current_date.day, showweeknumbers=False, selectbackground='green',
+                            selectforeground='black')
         self.cal.pack(padx=10, pady=10)
         self.cal.selection_set(current_date)
 
@@ -56,6 +58,7 @@ class CalendarView(tk.Toplevel):
         """
         Open the attendance window for a specific date.
         """
+        print(f"Opening attendance window for date: {date}")
         AttendanceWindow(self, self.db_manager, date)
 
     def end_month(self):
@@ -96,7 +99,8 @@ class CalendarView(tk.Toplevel):
                 writer.writeheader()
                 writer.writerows(attendance_data)
 
-            messagebox.showinfo("Success", f"The month has been finalized and exported to {filename}", parent=self)
+            messagebox.showinfo("Success", f"The month has been finalized and exported to {filename}",
+                                parent=self)
         else:
             # If the user clicked "No", show a message and do nothing
             messagebox.showinfo("Cancelled", "End month cancelled.")
