@@ -139,13 +139,14 @@ class DaycareDatabaseApp:
         Remove a child from the database.
         """
         data = self.db_manager.read_database()
-        if not any(child['name'] == name for child in data):
-            messagebox.showerror("Error", f"No child with name {name} found", parent=window)
-            return
 
-        data = [child for child in data if child['name'] != name]
-        self.db_manager.write_database(data)
-        messagebox.showinfo("Success", "Child removed successfully", parent=window)
+        if any(child['name'] == name for child in data):
+            data = [child for child in data if child['name'] != name]
+            self.db_manager.write_database(data)
+            messagebox.showinfo("Success", "Child removed successfully", parent=window)
+        else:
+            messagebox.showerror("Error", "Child not found in the database", parent=window)
+
         window.destroy()
 
     def view_list(self):
@@ -211,8 +212,24 @@ class DaycareDatabaseApp:
         """
         try:
             amount = float(amount)
-            if amount < 0:
-                raise ValueError
+
+            data = self.db_manager.read_database()
+            for child in data:
+                if child['name'] == name:
+                    if amount > float(child['balance']):
+                        overpayment = amount - float(child['balance'])
+                        child['balance'] = '0'
+                        messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
+                                                           f"Change of {overpayment:.2f} "
+                                                           f"is due to the customer.", parent=window)
+                    else:
+                        child['balance'] = str(float(child['balance']) - amount)
+                    self.db_manager.write_database(data)
+                    messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
+                    window.destroy()
+                    return
+            messagebox.showerror("Error", f"No child with name {name} found", parent=window)
+
         except ValueError:
             messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
             return
