@@ -60,11 +60,6 @@ class DatabaseManager:
         Write the updated attendance data.
         """
         try:
-            # Check if the date is before the current day
-            for row in data:
-                if datetime.datetime.strptime(row['date'], '%Y-%m-%d').date() < datetime.date.today():
-                    raise ValueError("Cannot modify past dates.")
-
             # Count the number of children for the given date
             date_counts = {}
             for row in data:
