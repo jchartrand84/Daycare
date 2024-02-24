@@ -21,6 +21,15 @@ class DatabaseManager:
         self.database_filename = os.path.join(os.path.dirname(__file__), database_filename)
         self.attendance_filename = os.path.join(os.path.dirname(__file__), attendance_filename)
 
+    def is_name_unique(self, name):
+        """
+        Check if a name is unique in the database.
+        """
+        data = self.read_database()
+        for row in data:
+            if row['name'].lower() == name.lower():
+                return False
+        return True
     def read_database(self):
         """
         Read the current database of children and their balances.

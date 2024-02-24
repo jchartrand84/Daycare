@@ -106,6 +106,12 @@ class DaycareDatabaseApp:
             messagebox.showerror("Error", "Age must be a positive integer.", parent=window)
             return
 
+        if not self.db_manager.is_name_unique(name):
+            messagebox.showerror("Error",
+                                 f"The name '{name}' is already in use. Please use a unique name. Note: names are not case sensitive.",
+                                 parent=window)
+            return
+
         data = self.db_manager.read_database()
         data.append({'name': name, 'age': age, 'balance': '0'})
 
