@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import messagebox
+import datetime
 
 """
 attendance_window.py
@@ -25,18 +26,22 @@ class AttendanceWindow(tk.Toplevel):
         self.title(f"Attendance for {date}")
 
         all_children = self.get_all_children()
+        if not all_children:
+            messagebox.showinfo("Error", "No children in the database.", parent=self)
+            return
+
         self.child_name = tk.StringVar(self)
         self.child_name.set(all_children[0])
         self.child_menu = tk.OptionMenu(self, self.child_name, *all_children)
         self.child_menu.config(width=20)
         self.child_menu.grid(row=0, column=2, sticky='w')
 
-        self.add_button = tk.Button(self, text='Add', command=lambda: self.add_child_to_attendance(self.child_name.get()
-                                                                                                   ), width=20)
+        self.add_button = tk.Button(self, text='Add', command=lambda: self.
+                                    add_child_to_attendance(self.child_name.get()), width=20)
         self.add_button.grid(row=1, column=2)
 
-        self.remove_button = tk.Button(self, text='Remove', command=lambda: self.remove_child_from_attendance(
-            self.child_name.get()), width=20)
+        self.remove_button = tk.Button(self, text='Remove', command=lambda: self.
+                                       remove_child_from_attendance(self.child_name.get()), width=20)
         self.remove_button.grid(row=2, column=2)
 
         self.exit_button = tk.Button(self, text='Exit', command=self.destroy, width=20)
@@ -84,7 +89,17 @@ class AttendanceWindow(tk.Toplevel):
         """
         Add a child to the attendance for the current date.
         """
+        all_children = self.get_all_children()
+        if child_name not in all_children:
+            messagebox.showinfo("Error", f"{child_name} does not exist in the database.", parent=self)
+            return
+
         if self.check_month_finalized() or self.check_weekend():
+            return
+
+        # Check if the date is in the past
+        if self.date < datetime.date.today():
+            messagebox.showinfo("Error", "Cannot modify past dates.", parent=self)
             return
 
         attendance_data = self.db_manager.read_attendance()
@@ -93,7 +108,7 @@ class AttendanceWindow(tk.Toplevel):
                 messagebox.showinfo("Error", f"{child_name} is already attending on {self.date}.", parent=self)
                 return
 
-        attendance_data.append({'date': str(self.date), 'name': child_name})
+        attendance_data.append({'date': self.date, 'name': child_name})
         self.db_manager.write_attendance(attendance_data)
 
         # Update the labels
@@ -103,6 +118,11 @@ class AttendanceWindow(tk.Toplevel):
         """
         Remove a child from the attendance for the current date.
         """
+        all_children = self.get_all_children()
+        if child_name not in all_children:
+            messagebox.showinfo("Error", f"{child_name} does not exist in the database.", parent=self)
+            return
+
         if self.check_month_finalized() or self.check_weekend():
             return
 

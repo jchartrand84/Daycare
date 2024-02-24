@@ -1,7 +1,5 @@
 import csv
 import os
-import datetime
-from tkinter import messagebox
 
 """
 database_manager.py
@@ -74,3 +72,4 @@ class DatabaseManager:
                 writer.writerows(data)
         except ValueError as e:
             messagebox.showerror("Error", str(e))
+
