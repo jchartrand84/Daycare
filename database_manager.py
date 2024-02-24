@@ -1,5 +1,6 @@
 import csv
 import os
+from tkinter import messagebox
 
 """
 database_manager.py
@@ -30,6 +31,7 @@ class DatabaseManager:
             if row['name'].lower() == name.lower():
                 return False
         return True
+
     def read_database(self):
         """
         Read the current database of children and their balances.
@@ -81,4 +83,3 @@ class DatabaseManager:
                 writer.writerows(data)
         except ValueError as e:
             messagebox.showerror("Error", str(e))
-

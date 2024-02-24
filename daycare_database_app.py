@@ -108,8 +108,8 @@ class DaycareDatabaseApp:
 
         if not self.db_manager.is_name_unique(name):
             messagebox.showerror("Error",
-                                 f"The name '{name}' is already in use. Please use a unique name. Note: names are not case sensitive.",
-                                 parent=window)
+                                 f"The name '{name}' is already in use. Please use a unique name. "
+                                 f"Note: names are not case sensitive.", parent=window)
             return
 
         data = self.db_manager.read_database()
@@ -131,12 +131,13 @@ class DaycareDatabaseApp:
 
         tk.Label(remove_window, text='Name:').grid(row=0, column=0)
 
-        # Get the list of children's names, sort it, and create a Combobox with it
+        # Get the list of children's names, sort it, and create an OptionMenu with it
         children_names = sorted([child['name'] for child in self.db_manager.read_database()])
-        name_combobox = ttk.Combobox(remove_window, values=children_names)
-        name_combobox.grid(row=0, column=1)
+        selected_name = tk.StringVar()
+        name_optionmenu = tk.OptionMenu(remove_window, selected_name, *children_names)
+        name_optionmenu.grid(row=0, column=1)
 
-        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(name_combobox.get(),
+        tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(selected_name.get(),
                                                                                  remove_window)).grid(row=1, column=0)
         tk.Button(remove_window, text='Cancel', command=remove_window.destroy).grid(row=1, column=1)
 
@@ -197,16 +198,19 @@ class DaycareDatabaseApp:
         names_and_balances = [f"{child['name'].ljust(20)} {format(float(child['balance']), '.2f').strip().rjust(10)}"
                               for child in children_with_balance]
 
-        # Create a Combobox with the list of strings
-        name_combobox = ttk.Combobox(payment_window, values=names_and_balances, font=('Courier', 10))
-        name_combobox.grid(row=0, column=1)
+        # Create an OptionMenu with the list of strings
+        selected_name_and_balance = tk.StringVar()
+        name_optionmenu = tk.OptionMenu(payment_window, selected_name_and_balance, *names_and_balances)
+        name_optionmenu.config(font=('Courier', 10))
+        name_optionmenu.grid(row=0, column=1)
 
         tk.Label(payment_window, text='Amount:').grid(row=1, column=0)
         amount_entry = tk.Entry(payment_window)
         amount_entry.grid(row=1, column=1)
 
         tk.Button(payment_window, text='Apply',
-                  command=lambda: self.apply_payment(name_combobox.get().strip().split()[0], amount_entry.get(),
+                  command=lambda: self.apply_payment(selected_name_and_balance.get().strip().split()[0],
+                                                     amount_entry.get(),
                                                      payment_window)).grid(row=2, column=0)
 
         tk.Button(payment_window, text='Exit', command=payment_window.destroy).grid(row=2, column=1)
