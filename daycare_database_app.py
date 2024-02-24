@@ -89,6 +89,9 @@ class DaycareDatabaseApp:
         """
         Add a child to the database.
         """
+        # Ensure the first letter of the name is uppercase
+        name = name.capitalize()
+
         if not name:
             messagebox.showerror("Error", "Name cannot be empty.", parent=window)
             return
@@ -172,7 +175,7 @@ class DaycareDatabaseApp:
         tree.column('Age', anchor='e')
         tree.column('Balance', anchor='e')
 
-        for child in sorted(self.db_manager.read_database(), key=lambda x: x['name']):
+        for child in sorted(self.db_manager.read_database(), key=lambda x: x['name'].lower()):
             formatted_balance = "{:.2f}".format(float(child['balance']))
             tree.insert('', tk.END, values=(child['name'], child['age'], formatted_balance))
 
