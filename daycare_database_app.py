@@ -21,18 +21,21 @@ class DaycareDatabaseApp:
         """
         Initialize the DaycareDatabaseApp with a root Tkinter window.
         """
+        # Initialize the root window and set the title
         self.root = root_window
-        # rest of your code
         self.root.title('Daycare Database Management')
+
+        # Initialize the DatabaseManager
         self.db_manager = DatabaseManager()
 
+        # Set up the button frame with custom font and dimensions# Create the main application window
         custom_font = ('Helvetica', 12)
         button_frame = tk.Frame(self.root, bg='lightgrey')
         button_frame.pack(fill='x', padx=10, pady=10)
-
         button_width = 20
         button_height = 2
 
+        # Add buttons for various functionalities like Calendar, Add New Child, View Database, etc.
         tk.Button(button_frame, text='Calendar', command=self.open_calendar_window, font=custom_font,
                   bg='lightblue', width=button_width, height=button_height).grid(row=0, column=0, padx=5, pady=5)
         ttk.Separator(button_frame, orient='vertical').grid(row=0, column=1, rowspan=3, sticky='ns')
@@ -59,23 +62,26 @@ class DaycareDatabaseApp:
         """
         Open the calendar view window.
         """
+        # Create an instance of the CalendarView class
         CalendarView(self.root, self.db_manager)
 
     def open_add_child_window(self):
         """
         Open the add child window.
         """
+        # Create a new top-level window and set its title
         add_window = tk.Toplevel(self.root)
         add_window.title("Add Child")
 
+        # Add labels and entry fields for Name and Age
         tk.Label(add_window, text='Name:').grid(row=0, column=0)
         name_entry = tk.Entry(add_window)
         name_entry.grid(row=0, column=1)
-
         tk.Label(add_window, text='Age:').grid(row=1, column=0)
         age_entry = tk.Entry(add_window)
         age_entry.grid(row=1, column=1)
 
+        # Add Enter and Cancel buttons
         tk.Button(add_window, text='Enter',
                   command=lambda: self.add_child(name_entry.get(), age_entry.get(), add_window)).grid(row=2, column=0)
         tk.Button(add_window, text='Cancel', command=add_window.destroy).grid(row=2, column=1)
@@ -92,6 +98,7 @@ class DaycareDatabaseApp:
         # Ensure the first letter of the name is uppercase
         name = name.capitalize()
 
+        # Validate the name and age inputs
         if not name:
             messagebox.showerror("Error", "Name cannot be empty.", parent=window)
             return
@@ -109,29 +116,32 @@ class DaycareDatabaseApp:
             messagebox.showerror("Error", "Age must be a positive integer.", parent=window)
             return
 
+        # Check if the name is unique
         if not self.db_manager.is_name_unique(name):
             messagebox.showerror("Error",
                                  f"The name '{name}' is already in use. Please use a unique name. "
                                  f"Note: names are not case sensitive.", parent=window)
             return
 
+        # Add the new child to the database and sort the data by children's names
         data = self.db_manager.read_database()
         data.append({'name': name, 'age': age, 'balance': '0'})
-
-        # Sort the data by children's names
         data.sort(key=lambda x: x['name'])
 
+        # Write the updated child data to the database after applying the payment
         self.db_manager.write_database(data)
         messagebox.showinfo("Success", "Child added successfully", parent=window)
-        window.destroy()
+        window.destroy()  # Close the window after successfully adding the child
 
     def open_remove_child_window(self):
         """
         Open the remove child window.
         """
+        # Create a new top-level window and set its title
         remove_window = tk.Toplevel(self.root)
         remove_window.title("Remove Child")
 
+        # Add a label for the Name field
         tk.Label(remove_window, text='Name:').grid(row=0, column=0)
 
         # Get the list of children's names, sort it, and create an OptionMenu with it
@@ -140,6 +150,7 @@ class DaycareDatabaseApp:
         name_remove_menu = tk.OptionMenu(remove_window, selected_name, *children_names)
         name_remove_menu.grid(row=0, column=1)
 
+        # Add Enter and Cancel buttons
         tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(selected_name.get(),
                                                                                  remove_window)).grid(row=1, column=0)
         tk.Button(remove_window, text='Cancel', command=remove_window.destroy).grid(row=1, column=1)
@@ -148,24 +159,27 @@ class DaycareDatabaseApp:
         """
         Remove a child from the database.
         """
+        # Read the children's data from the database
         data = self.db_manager.read_database()
 
-        if any(child['name'] == name for child in data):
-            data = [child for child in data if child['name'] != name]
-            self.db_manager.write_database(data)
-            messagebox.showinfo("Success", "Child removed successfully", parent=window)
-        else:
-            messagebox.showerror("Error", "Child not found in the database", parent=window)
+        # Remove the child from the database & prompt user with a success message
+        data = [child for child in data if child['name'] != name]
 
-        window.destroy()
+        self.db_manager.write_database(data)
+        messagebox.showinfo("Success", "Child removed successfully", parent=window)
+
+        window.destroy()  # Close the window
 
     def view_list(self):
         """
         Open the view list window.
+        This window displays a list of all children in the database along with their age and balance.
         """
+        # Create a new top-level window and set its title
         list_window = tk.Toplevel(self.root)
         list_window.title("View List")
 
+        # Create a Treeview widget with columns for Name, Age, and Balance
         tree = ttk.Treeview(list_window, columns=("Name", "Age", "Balance"), show="headings")
         tree.heading('Name', text='Name', anchor='e')
         tree.heading('Age', text='Age', anchor='e')
@@ -175,11 +189,15 @@ class DaycareDatabaseApp:
         tree.column('Age', anchor='e')
         tree.column('Balance', anchor='e')
 
+        # Populate the Treeview with data from the database
         for child in sorted(self.db_manager.read_database(), key=lambda x: x['name'].lower()):
             formatted_balance = "{:.2f}".format(float(child['balance']))
             tree.insert('', tk.END, values=(child['name'], child['age'], formatted_balance))
 
+        # Add the Treeview to the window and pack it
         tree.pack(expand=True, fill='both')
+
+        # Add an Exit button to the window
         tk.Button(list_window, text='Exit', command=list_window.destroy).pack(fill='x')
 
     def open_payment_window(self):
@@ -211,6 +229,7 @@ class DaycareDatabaseApp:
         amount_entry = tk.Entry(payment_window)
         amount_entry.grid(row=1, column=1)
 
+        # Add Apply and Exit buttons
         tk.Button(payment_window, text='Apply',
                   command=lambda: self.apply_payment(selected_name_and_balance.get().strip().split()[0],
                                                      amount_entry.get(),
@@ -224,28 +243,38 @@ class DaycareDatabaseApp:
         the balance is set to 0 and the overpayment is returned to the customer.
         """
         try:
+            # Convert the amount to a float and validate it
             amount = float(amount)
             if amount < 0:
                 messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
                 return
 
+            # Read the children's data from the database
             data = self.db_manager.read_database()
+
+            # Find the child with the given name and apply the payment
             for child in data:
                 if child['name'] == name:
                     if amount > float(child['balance']):
+                        # If the payment is more than the balance, calculate the overpayment
                         overpayment = amount - float(child['balance'])
                         child['balance'] = '0'
                         messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
                                                            f"Change of {overpayment:.2f} "
                                                            f"is due to the customer.", parent=window)
                     else:
+                        # If the payment is less than or equal to the balance, subtract the payment from the balance
                         child['balance'] = str(float(child['balance']) - amount)
+
+                    # Write the updated child data to the database after applying the payment
                     self.db_manager.write_database(data)
+
+                    # Show a success message and close the window
                     messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
                     window.destroy()
                     return
-            messagebox.showerror("Error", f"No child with name {name} found", parent=window)
 
         except ValueError:
+            # If the amount is not a valid float, show an error message
             messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
             return

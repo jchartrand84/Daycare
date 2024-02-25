@@ -94,10 +94,13 @@ class AttendanceWindow(tk.Toplevel):
         Add a child to the attendance for the current date.
         """
         all_children = self.get_all_children()
+
+        # Check if the child's name exists in the database
         if child_name not in all_children:
             messagebox.showinfo("Error", f"{child_name} does not exist in the database.", parent=self)
             return
 
+        # Check if the current month has been finalized
         if self.check_month_finalized() or self.check_weekend():
             return
 
@@ -106,6 +109,7 @@ class AttendanceWindow(tk.Toplevel):
             messagebox.showinfo("Error", "Cannot modify past dates.", parent=self)
             return
 
+        # Check if the child is already attending on the specified date
         attendance_data = self.db_manager.read_attendance()
         for record in attendance_data:
             if record['date'] == str(self.date) and record['name'] == child_name:
@@ -119,25 +123,33 @@ class AttendanceWindow(tk.Toplevel):
                                          "\nChild cannot be added to attendance.", parent=self)
             return
 
+        # Write the updated attendance data to the database
         attendance_data.append({'date': self.date, 'name': child_name})
         self.db_manager.write_attendance(attendance_data)
 
-        # Update the labels
+        # Update the window labels
         self.update_labels()
 
     def remove_child_from_attendance(self, child_name):
         """
         Remove a child from the attendance for the current date.
         """
+        # Retrieve all children from the database
         all_children = self.get_all_children()
+
+        # Check if the child's name exists in the database
         if child_name not in all_children:
             messagebox.showinfo("Error", f"{child_name} does not exist in the database.", parent=self)
             return
 
+        # Check if the current month has been finalized or if the current day is a weekend
         if self.check_month_finalized() or self.check_weekend():
             return
 
+        # Retrieve the attendance data
         attendance_data = self.db_manager.read_attendance()
+
+        # Check if the child is attending on the specified date
         for record in attendance_data:
             if record['date'] == str(self.date) and record['name'] == child_name:
                 break
@@ -145,13 +157,16 @@ class AttendanceWindow(tk.Toplevel):
             messagebox.showinfo("Error", f"{child_name} is not attending on {self.date}.", parent=self)
             return
 
+        # Remove the child from the attendance data
         attendance_data = [
             record for record in attendance_data
             if record['name'] != child_name or record['date'] != str(self.date)
         ]
+
+        # Write the updated attendance data to the database
         self.db_manager.write_attendance(attendance_data)
 
-        # Update the labels
+        # Update the window labels
         self.update_labels()
 
     def check_month_finalized(self):
