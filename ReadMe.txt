@@ -3,7 +3,9 @@ Daycare Management System
 
 Description:
 ------------
-This project is a Daycare Management System developed in Python using the Tkinter library for the graphical user interface (GUI). It provides a comprehensive solution for managing a daycare center, including features for managing a database of children, processing payments, and managing a calendar for scheduling.
+This project is a Daycare Management System developed in Python using the Tkinter library for the graphical
+user interface (GUI). It provides a comprehensive solution for managing a daycare center, including features for
+managing a database of children, processing payments, and managing a calendar for scheduling.
 
 Features:
 ---------
@@ -15,6 +17,7 @@ Requirements:
 -------------
 - Python 3.12.2
 - Tkinter library (usually included with Python)
+- tkcalendar library (install using `pip install tkcalendar`)
 
 Installation:
 -------------
