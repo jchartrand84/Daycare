@@ -137,8 +137,8 @@ class DaycareDatabaseApp:
         # Get the list of children's names, sort it, and create an OptionMenu with it
         children_names = sorted([child['name'] for child in self.db_manager.read_database()])
         selected_name = tk.StringVar()
-        name_optionmenu = tk.OptionMenu(remove_window, selected_name, *children_names)
-        name_optionmenu.grid(row=0, column=1)
+        name_remove_menu = tk.OptionMenu(remove_window, selected_name, *children_names)
+        name_remove_menu.grid(row=0, column=1)
 
         tk.Button(remove_window, text='Enter', command=lambda: self.remove_child(selected_name.get(),
                                                                                  remove_window)).grid(row=1, column=0)
@@ -203,9 +203,9 @@ class DaycareDatabaseApp:
 
         # Create an OptionMenu with the list of strings
         selected_name_and_balance = tk.StringVar()
-        name_optionmenu = tk.OptionMenu(payment_window, selected_name_and_balance, *names_and_balances)
-        name_optionmenu.config(font=('Courier', 10))
-        name_optionmenu.grid(row=0, column=1)
+        name_payment_menu = tk.OptionMenu(payment_window, selected_name_and_balance, *names_and_balances)
+        name_payment_menu.config(font=('Courier', 10))
+        name_payment_menu.grid(row=0, column=1)
 
         tk.Label(payment_window, text='Amount:').grid(row=1, column=0)
         amount_entry = tk.Entry(payment_window)
@@ -225,6 +225,9 @@ class DaycareDatabaseApp:
         """
         try:
             amount = float(amount)
+            if amount < 0:
+                messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
+                return
 
             data = self.db_manager.read_database()
             for child in data:
@@ -246,20 +249,3 @@ class DaycareDatabaseApp:
         except ValueError:
             messagebox.showerror("Error", "Invalid amount. Please enter a positive number.", parent=window)
             return
-
-        data = self.db_manager.read_database()
-        for child in data:
-            if child['name'] == name:
-                if amount > float(child['balance']):
-                    overpayment = amount - float(child['balance'])
-                    child['balance'] = '0'
-                    messagebox.showinfo("Overpayment", f"The payment exceeded the balance due. "
-                                                       f"An amount of {overpayment:.2f} "
-                                                       f"will be returned to the customer.", parent=window)
-                else:
-                    child['balance'] = str(float(child['balance']) - amount)
-                self.db_manager.write_database(data)
-                messagebox.showinfo("Success", f"Payment of {amount:.2f} applied to {name}", parent=window)
-                window.destroy()
-                return
-        messagebox.showerror("Error", f"No child with name {name} found", parent=window)

@@ -20,22 +20,26 @@ class AttendanceWindow(tk.Toplevel):
         """
         Initialize the AttendanceWindow with a parent Tkinter window, a DatabaseManager, and a date.
         """
+        # Initialize the AttendanceWindow with a parent Tkinter window, a DatabaseManager, and a date
         super().__init__(parent)
         self.db_manager = db_manager
         self.date = date
         self.title(f"Attendance for {date}")
 
+        # Retrieve all children from the database and check if the database is empty
         all_children = self.get_all_children()
         if not all_children:
             messagebox.showinfo("Error", "No children in the database.", parent=self)
             return
 
+        # Create a dropdown menu with the names of all children
         self.child_name = tk.StringVar(self)
         self.child_name.set(all_children[0])
         self.child_menu = tk.OptionMenu(self, self.child_name, *all_children)
         self.child_menu.config(width=20)
         self.child_menu.grid(row=0, column=2, sticky='w')
 
+        # Add buttons for adding, removing, and exiting
         self.add_button = tk.Button(self, text='Add', command=lambda: self.
                                     add_child_to_attendance(self.child_name.get()), width=20)
         self.add_button.grid(row=1, column=2)
@@ -51,7 +55,7 @@ class AttendanceWindow(tk.Toplevel):
         tk.Frame(self, width=2, bg="black").grid(row=0, column=1, rowspan=4, sticky='ns')
 
         self.grid_columnconfigure(0, weight=1, minsize=100)  # Set a minimum width for the first column
-        self.update_labels()
+        self.update_labels()  # Update the attendance labels after adding or removing a child
 
     def update_labels(self):
         """
@@ -107,6 +111,13 @@ class AttendanceWindow(tk.Toplevel):
             if record['date'] == str(self.date) and record['name'] == child_name:
                 messagebox.showinfo("Error", f"{child_name} is already attending on {self.date}.", parent=self)
                 return
+
+        # Check if the daily limit has been reached
+        daily_attendance = [record for record in attendance_data if record['date'] == str(self.date)]
+        if len(daily_attendance) >= 6:
+            messagebox.showinfo("Error", "Daily capacity (6) has been reached."
+                                         "\nChild cannot be added to attendance.", parent=self)
+            return
 
         attendance_data.append({'date': self.date, 'name': child_name})
         self.db_manager.write_attendance(attendance_data)

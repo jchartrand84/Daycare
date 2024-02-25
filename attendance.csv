@@ -1,6 +1,5 @@
 date,name
 2024-02-22,Alice
-2024-02-27,Alice
 2024-02-27,Emma
 2024-02-21,Lucas
 2024-03-12,Jacob
@@ -11,8 +10,6 @@ date,name
 2024-02-21,Mello
 2024-02-29,Mello
 2024-02-29,Alice
-2024-02-27,Ethan
-2024-02-27,Jude
 2024-03-21,Emma
 2024-02-21,Bob
 2024-02-21,Ethan
@@ -29,3 +26,8 @@ date,name
 2024-02-26,Alice
 2024-02-26,Bob
 2024-02-26,Charlie
+2024-02-27,Elijah
+2024-02-27,Lucas
+2024-02-27,Mason
+2024-02-27,Logan
+2024-02-28,Alice
