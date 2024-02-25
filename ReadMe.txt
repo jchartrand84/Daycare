@@ -35,5 +35,7 @@ Usage:
 
 Contact:
 --------
-For any questions or suggestions, please contact the project maintainer at robert.boutette@dal.ca.
+For any questions or suggestions, please contact the project maintainers at:
+                                                                            robert.boutette@dal.ca
+                                                                            jonathan.chartrand@dal.ca
 
